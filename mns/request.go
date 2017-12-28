@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"github.com/denverdino/aliyungo/util"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/denverdino/aliyungo/util"
 )
 
 type request struct {
@@ -62,6 +63,10 @@ func (client *Client) doRequest(req *request) (*http.Response, error) {
 	req.headers["Date"] = util.GetGMTime()
 	req.headers["Host"] = req.endpoint
 	req.headers["x-mns-version"] = client.Version
+
+	if client.SecurityToken != "" {
+		req.headers["security-token"] = client.SecurityToken
+	}
 
 	client.SignRequest(req, payload)
 

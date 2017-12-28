@@ -50,13 +50,14 @@ func (queue *Queue) Send(time int64, message []byte) (msg MsgSend, err error) {
 }
 
 //消费队列消息
-func (queue *Queue) Receive(messageChan chan MsgReceive, errChan chan error) {
+func (queue *Queue) Receive(messageChan chan []*MsgReceive, errChan chan error) {
 	req := &request{
 		endpoint: queue.Endpoint,
 		method:   http.MethodGet,
 		path:     getPath(queue.QueueName),
 		params: map[string]string{
-			"waitseconds": strconv.Itoa(5),
+			"waitseconds":   strconv.Itoa(5),
+			"numOfMessages": "16",
 		},
 		payload:     nil,
 		contentType: "text/xml",
@@ -70,9 +71,9 @@ func (queue *Queue) Receive(messageChan chan MsgReceive, errChan chan error) {
 	}
 
 	defer response.Body.Close()
-	rs := MsgReceive{}
+	//rs := MsgReceive{}
+	var rs MsgReceives
 	//err = xml.NewDecoder(response.Body).Decode(rs)
-
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		errChan <- err
@@ -85,8 +86,7 @@ func (queue *Queue) Receive(messageChan chan MsgReceive, errChan chan error) {
 		errChan <- err
 		return
 	}
-
-	messageChan <- rs
+	messageChan <- rs.Message
 	return
 }
 
