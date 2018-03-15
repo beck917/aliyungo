@@ -113,3 +113,39 @@ func (queue *Queue) Delete(receiptHandle string, errChan chan error) {
 	errChan <- nil
 	return
 }
+
+type ReceiptHandles struct {
+	XMLName        xml.Name `xml:"ReceiptHandles"`
+	ReceiptHandles []string `xml:"ReceiptHandle"`
+}
+
+//删除队列消息
+func (queue *Queue) DeleteBatch(errChan chan error, receiptHandles ...string) {
+	req := &request{
+		endpoint: queue.Endpoint,
+		method:   http.MethodDelete,
+		path:     getPath(queue.QueueName),
+		params:   map[string]string{
+		//"ReceiptHandle": receiptHandle,
+		},
+		payload:     nil,
+		contentType: "text/xml",
+		headers:     map[string]string{},
+	}
+
+	handlers := ReceiptHandles{}
+
+	for _, handler := range receiptHandles {
+		handlers.ReceiptHandles = append(handlers.ReceiptHandles, handler)
+	}
+	req.payload, _ = xml.Marshal(handlers)
+
+	_, err := queue.doRequest(req)
+	if err != nil {
+		errChan <- err
+		return
+	}
+
+	errChan <- nil
+	return
+}

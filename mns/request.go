@@ -97,6 +97,7 @@ func (client *Client) doRequest(req *request) (*http.Response, error) {
 	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 204 {
 		return nil, buildError(resp)
 	}
+
 	return resp, nil
 }
 
